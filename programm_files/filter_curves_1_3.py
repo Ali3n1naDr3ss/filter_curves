@@ -5,7 +5,8 @@ from matplotlib.gridspec import GridSpec
 nipy_spectral = plt.get_cmap('nipy_spectral')
 
 LBG_spectrum = '/Users/user/Documents/filter_curves/data_files/REBELS-05_1dspec_wRMS.dat'
-# CISTA-VIRCAM
+
+# VISTA-VIRCAM
 vista_y = np.loadtxt('/Users/user/Documents/filter_curves/data_files/VISTA_Filters_at80K_forETC_Y.dat') 
 vista_j = np.loadtxt('/Users/user/Documents/filter_curves/data_files/VISTA_Filters_at80K_forETC_J.dat')
 vista_h = np.loadtxt('/Users/user/Documents/filter_curves/data_files/VISTA_Filters_at80K_forETC_H.dat')
@@ -24,20 +25,28 @@ euclid_Y = '/Users/user/Documents/filter_curves/data_files/Euclid_Y.csv'
 euclid_J = '/Users/user/Documents/filter_curves/data_files/Euclid_J.csv'
 euclid_VIS = '/Users/user/Documents/filter_curves/data_files/Euclid_VIS.csv'
 
-files = [LBG_spectrum, vista_y, vista_j, vista_h, vista_Ks, subaru_B, subaru_V, subaru_gplus, subaru_rplus, subaru_iplus, euclid_H, euclid_Y, euclid_J, euclid_VIS]
+files = [LBG_spectrum,
+          vista_y, vista_j, vista_h, vista_Ks,
+          subaru_B, subaru_V, subaru_gplus, subaru_rplus, subaru_iplus,
+            euclid_H, euclid_Y, euclid_J, euclid_VIS]
 
-# VISTA Wavelengths
-def vista_wavelength_converter(file):
-    ''' Converts Angstrom to microns fior raw VISTA data'''
+"""
+# Prepare VISTA Wavelengths (unit conversion)
+def angstrom_to_micron(file):
+    ''' Converts Angstrom to microns for raw (VISTA) data'''
     vista_wavelengths = []
     vista_wavelength = file[:,0] * 1e-4
     vista_wavelengths.append(vista_wavelength)
     return vista_wavelengths
-
+"""
 
 # Prepare Subaru and Euclid data
-def csv_to_list(file):
-    ''' Converts csv files to lists for Subaru and Euclid data'''
+def micron_nJy_data(file):
+    '''
+    Converts csv files to lists (for Subaru and Euclid data)
+    and returns lists containing wavelength data (in microns) 
+    and flux data in nJy.
+      '''
     wavelength_list = []
     transmission_list = []
     with open(file,'r', encoding='utf-8-sig') as csvfile:
@@ -47,19 +56,45 @@ def csv_to_list(file):
             transmission_list.append(100*float(row[1])) # convert to percentage
     return wavelength_list, transmission_list
 
+
+plt.figure(figsize=(15,10))
+gs = GridSpec(3, 3)
+ax1 = plt.subplot(gs[0, 0])
+
+for file in files[5:7]:
+    wl = []
+    files[files.index[file]] = micron_nJy_data(file)[0]
+    wl.append(files[files.index[file]])
+print(wl)
+    #files[files.index[file]] = micron_nJy_data(file)[1]
+    #ax1.plot(files[files.index[file]], transmissions[file], label='Subaru ?', color=nipy_spectral(0.05))
+
+'''
+ax1.set_title('Subaru Optical Filters')
+ax1.set_ylabel(r'Transmission ($\%$)')
+ax1.set_xlabel(r'Wavelength ($\mu$)')
+ax1.set_ylim(0,110)
+ax1.legend(loc='lower right')
+
+plt.tight_layout()
+plt.show()
+'''
+
+
+"""
 vista_filters = [vista_y, vista_j, vista_h, vista_Ks]
 for vista_filter in vista_filters:
-    vista_wavelength = vista_wavelength_converter(vista_filter)
+    vista_wavelength = angstrom_to_micron(vista_filter)
     #print(vista_wavelength)
     vista_flux = vista_filter[:,1]
 
 subaru_filters = [subaru_B, subaru_V, subaru_gplus, subaru_rplus, subaru_iplus]
 for subaru_filter in subaru_filters:
-    subaru_wavelength, subaru_transmission = csv_to_list(subaru_filter)
+    subaru_wavelength, subaru_transmission = micron_nJy_data(subaru_filter)
 
 euclid_filters = [euclid_H, euclid_Y, euclid_J, euclid_VIS]
 for euclid_filter in euclid_filters:
-    euclid_wavelength, euclid_transmission = csv_to_list(euclid_filter,)
+    euclid_wavelength, euclid_transmission = micron_nJy_data(euclid_filter,)
 
 LBG_wavelength = []
 LBG_flux = []
@@ -139,3 +174,4 @@ ax4.set_title('All Filters')
 
 plt.tight_layout()
 plt.show()
+"""
