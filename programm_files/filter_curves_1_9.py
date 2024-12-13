@@ -1,10 +1,22 @@
 # works nice! colours not very cute tho
+# working on  in-line labelling
 
 # imports and colour spectra from 
 # https://matplotlib.org/stable/gallery/color/colormap_reference.html
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
+from labellines import labelLines
+
+# Define constants 
+z_REBELS = 6.496 # rredshift
+c = 3e18 # speed of light (Angstrom/s)
+base = 0.5 # base for shaded plot areas - ensures no plots are white
+
+telescopes = ['VISTA', 'Subaru', 'Euclid']
+vista_filters = ['Y', 'J', 'H', 'Ks']
+subaru_filters = ['B', 'V', 'gplus', 'rplus', 'iplus']
+euclid_filters = ['H', 'Y', 'J', 'VIS']
 
 def LBG_spectrum_prep():
     LBG_spectrum = '/Users/user/Documents/filter_curves/data_files/REBELS-05_1dspec_wRMS.dat'
@@ -51,6 +63,28 @@ def Lyman_break_position(z):
     lyman_break_observed = [lyman_break_observed] * len(y)
     
     return lyman_break_observed, y
+
+def remove_spectrum_noise(lyman_break_observed, LBG_wavelength, LBG_flux):
+    '''
+    Removes the noise from the short-wavelength regime of the provided spectrum.
+
+    INPUT(s)
+    lyman_break_observed(float): observed wavelength of Lyman break in microns
+    LBG_wavelength(list): list of wavelengths measurements for each sample point on spectrum
+    LBG_flux(list): list of flux measurements for each sample point on spectrum
+
+    OUTPUT(s)
+    noise_removed_wavelength(list): list of wavelengths with noise removed
+    noise_removed_flux(list): list of flux with noise removed
+    '''
+    noise_removed_wavelength = []
+    noise_removed_flux = []
+    
+    for i in range(len(LBG_wavelength)):
+        if LBG_wavelength[i] >= lyman_break_observed[0]:
+            noise_removed_wavelength.append(LBG_wavelength[i])
+            noise_removed_flux.append(LBG_flux[i])
+    return noise_removed_wavelength, noise_removed_flux
 
 def get_data_files(telescopes, vista_filters, subaru_filters, euclid_filters):
     '''
@@ -130,37 +164,40 @@ def filter_curve_plotter(vista_files, subaru_files, euclid_files, LBG_wavelength
                 plt.fill_between(subaru_files[subaru_filter][0], subaru_files[subaru_filter][1],
                                 color=YlOrRd(base+0.75*subaru_filters.index(subaru_filter)), alpha=0.2, label=f'Subaru {subaru_filter}')
         elif telescope == 'Euclid':
+            labelled_lines = []
+            ###x#vals = []
             for euclid_filter in euclid_filters:
-                plt.plot(euclid_files[euclid_filter][0], euclid_files[euclid_filter][1], label=f'Euclid {euclid_filter}',
+                line, = plt.plot(euclid_files[euclid_filter][0], euclid_files[euclid_filter][1], label=f'Euclid {euclid_filter}',
                           color=oranges(base+0.75*euclid_filters.index(euclid_filter)))
+                labelled_lines.append(line)
+                ##x#data = line.get_xdata()
+                #x#midpoint = (xdata[0] + xdata[-1]) / 2
+                #xvals.append(xmidpoint)
                 plt.fill_between(euclid_files[euclid_filter][0], euclid_files[euclid_filter][1],
                                 color=oranges(base+0.75*euclid_filters.index(euclid_filter)), alpha=0.2, label=f'Euclid {euclid_filter}')
-    plt.plot(LBG_wavelength, LBG_flux, label='LBG Spectrum', color='gray')
-    plt.plot(lyman_break_observed, y, label='Lyman Break', color='magenta', linestyle='--')
+    
+    plt.plot(LBG_wavelength, LBG_flux, label=f'z = {z_REBELS} LBG Spectrum', color='gray')
+    plt.plot(lyman_break_observed, y, label=f'Lyman Break at $z =$ {z_REBELS}', color='magenta', linestyle='--')
+    #labelled_lines = labelled_lines.append(plt.plot(LBG_wavelength, LBG_flux, label=f'$z =${z_REBELS} LBG Spectrum', color='gray'))
+
     plt.title('Filter Curves')
-    plt.xlabel(r'Wavelength $(\mu)$')
+    plt.xlabel(r'Observed Wavelength $(\mu)$')
     plt.ylabel('Transmission (%)')
     plt.xlim(0.3, 3.0)
     plt.ylim(0,110)
-    plt.legend()
+    #plt.legend(loc='best')
+    labelLines(labelled_lines, align=True) #xvals=xmidpoint, zorder=2.5)
     plt.show()
 
 PuRd = plt.get_cmap('PuRd')
 YlOrRd = plt.get_cmap('PuBuGn')
 oranges = plt.get_cmap('Oranges')
 
-# Define constants 
-z = 6.496 # rredshift
-c = 3e18 # speed of light (Angstrom/s)
-base = 0.5 # base for shaded plot areas - ensures no plots are white
-
-telescopes = ['VISTA', 'Subaru', 'Euclid']
-vista_filters = ['Y', 'J', 'H', 'Ks']
-subaru_filters = ['B', 'V', 'gplus', 'rplus', 'iplus']
-euclid_filters = ['H', 'Y', 'J', 'VIS']
 
 LBG_wavelength, LBG_flux = LBG_spectrum_prep()
-lyman_break_observed, y = Lyman_break_position(z)
+lyman_break_observed, y = Lyman_break_position(z_REBELS)
+LBG_wavelength, LBG_flux = remove_spectrum_noise(lyman_break_observed, LBG_wavelength, LBG_flux)
 vista_files, subaru_files, euclid_files = get_data_files(telescopes, vista_filters, subaru_filters, euclid_filters)
 vista_files, subaru_files, euclid_files = sort_filter_data(vista_files, subaru_files, euclid_files)
 filter_curve_plotter(vista_files, subaru_files, euclid_files, LBG_wavelength, LBG_flux, lyman_break_observed, y)
+

@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 from matplotlib.gridspec import GridSpec
+from labellines import labelLines
 
 nipy_spectral = plt.get_cmap('nipy_spectral')
 
@@ -152,11 +153,10 @@ plt.plot(euclid_H_wavelength, euclid_H_transmission, label='Euclid H', color=nip
 plt.fill_between(euclid_H_wavelength, euclid_H_transmission, color=nipy_spectral(0.85), alpha=0.2)
 plt.xlim(0.3, 3.0)
 plt.ylim(0,110)
-plt.legend(loc='upper right')
+#plt.legend(loc='upper right')
 plt.ylabel(r"Transmission $(\%)$")
 plt.xlabel(r"Wavelength $(\mu)$")
 plt.title('All Filters')
-
-plt.legend()
+labelLines(plt.gca().get_lines(), zorder=5)
 plt.tight_layout()
 plt.show()

@@ -1,0 +1,8 @@
+0.02	100.0	bc2003_lr_m32_chab_const_100Myr.ascii
+0.02	10.0	bc2003_lr_m32_chab_const_10Myr.ascii
+0.2	100.0	bc2003_lr_m42_chab_const_100Myr.ascii
+1.0	100.0	bc2003_lr_m62_chab_const_100Myr.ascii
+0.2	250.0	bc2003_lr_m42_chab_tau_0_05_age_0_25.ascii
+0.2	500.0	bc2003_lr_m42_chab_tau_0_05_age_0_5.ascii
+0.2	250.0	bc2003_lr_m42_chab_tau_10_0_age_0_25.ascii
+0.2	500.0	bc2003_lr_m42_chab_tau_10_0_age_0_5.ascii
