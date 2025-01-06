@@ -1,14 +1,27 @@
 # based on version 1.7 
-# 
+# works really well - brek position is calculated correctly but
 # TODO: 
-# RECALCULATE BREAK POSITION INSTEP FUNCTION GENERATOR
-    # - use the same method as in the existing function
+# utilise existing function (Lyman_break_position) to calculate the break position for the step functions
 
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
 from labellines import labelLines
 
+# plot colours
+PuRd = plt.get_cmap('PuRd')
+YlOrRd = plt.get_cmap('PuBuGn')
+oranges = plt.get_cmap('Oranges')
+
+# Define constants 
+z_REBELS05 = 6.496 # actual sprectrum redshift
+c = 3e18 # speed of light (Angstrom/s)
+base = 0.2 # base for shaded plot areas - ensures no plots are white
+
+telescopes = ['VISTA', 'Subaru', 'Euclid']
+vista_filters = ['Y', 'J', 'H', 'Ks']
+subaru_filters = ['B', 'V', 'gplus', 'rplus', 'iplus']
+euclid_filters = ['H', 'Y', 'J', 'VIS']
 
 # LBGs at other redshifts - use step functions for now
 def LBG_step_generator():
@@ -17,7 +30,7 @@ def LBG_step_generator():
     """
     redshifts = [7, 8, 9, 10, 11]
     observed_wavelengths = []
-    rest_frame_wavelength = 912*1e-4 # microns
+    rest_frame_wavelength = 1216*1e-4 # microns
 
     # calculate observed wl
     def observed_wavelength_calculator(rest_frame_wavelength, z):
@@ -56,16 +69,6 @@ def LBG_step_generator():
             plt.plot(x_values, y_const, color=step_colour(step_colour_base + 0.2 * i), label=step_label)  # horizontal
 
     labelLines(align=True, xvals=[1.75,1.75,1.75,1.75,1.75], zorder=2.5)
-
-# Define constants 
-z_REBELS05 = 6.496 # actual sprectrum redshift
-c = 3e18 # speed of light (Angstrom/s)
-base = 0.2 # base for shaded plot areas - ensures no plots are white
-
-telescopes = ['VISTA', 'Subaru', 'Euclid']
-vista_filters = ['Y', 'J', 'H', 'Ks']
-subaru_filters = ['B', 'V', 'gplus', 'rplus', 'iplus']
-euclid_filters = ['H', 'Y', 'J', 'VIS']
 
 def LBG_spectrum_prep():
     LBG_spectrum = '/Users/user/Documents/filter_curves/data_files/REBELS-05_1dspec_wRMS.dat'
@@ -107,8 +110,8 @@ def Lyman_break_position(z):
     y(np.array): y-axis values for the Lyman break plot
     '''
     y = np.linspace(-100, 1500, 1000)
-    lyman_break_rest = 912 * 1e-4 # Angstrom to microns
-    lyman_break_observed = lyman_break_rest*(z+1) 
+    lyman_break_rest = 1216 * 1e-4 # Angstrom to microns
+    lyman_break_observed = lyman_break_rest * (z+1) 
     lyman_break_observed = [lyman_break_observed] * len(y)
     
     return lyman_break_observed, y
@@ -224,17 +227,15 @@ def filter_curve_plotter(vista_files, subaru_files, euclid_files, LBG_wavelength
                                 color=oranges(base+0.5*euclid_filters.index(euclid_filter)), alpha=0.4, label=f'Euclid {euclid_filter}')
     line, = plt.plot(LBG_wavelength, LBG_flux, label=f'z = {z_REBELS05} LBG Spectrum', color='blue')
     labelled_lines_euclid.append(line)
-    plt.title('Filter Curves')
-    plt.xlabel(r'Observed Wavelength $(\mu)$')
-    plt.ylabel('Transmission (%)')
+    plt.title('Filter Curves', size=16)
+    plt.xlabel(r'Observed Wavelength $(\mu)$', size=12)
+    plt.ylabel('Transmission (%)', size=12)
     plt.xlim(0.3, 2.5)
     plt.ylim(0,110)
     labelLines(labelled_lines_euclid, align=False, xvals=[1.75,1.05,1.4,0.7,2.0], zorder=2.5, outline_width=7)
     plt.show()
 
-PuRd = plt.get_cmap('PuRd')
-YlOrRd = plt.get_cmap('PuBuGn')
-oranges = plt.get_cmap('Oranges')
+
 
 LBG_wavelength, LBG_flux = LBG_spectrum_prep()
 lyman_break_observed, y = Lyman_break_position(z_REBELS05)

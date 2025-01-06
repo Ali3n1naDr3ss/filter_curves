@@ -1,5 +1,4 @@
-# works nice! colours not very cute tho
-# working on  in-line labelling
+# works nice! colours not very clear
 
 # imports and colour spectra from 
 # https://matplotlib.org/stable/gallery/color/colormap_reference.html
